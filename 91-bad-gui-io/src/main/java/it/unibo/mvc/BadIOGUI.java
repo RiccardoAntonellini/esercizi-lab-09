@@ -11,14 +11,12 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Random;
-import java.io.InputStream;
-import java.util.ArrayList;
 
 /**
  * This class is a simple application that writes a random number on a file.
@@ -77,14 +75,11 @@ public class BadIOGUI {
             @Override
             @SuppressWarnings("PMD.SystemPrintln")
             public void actionPerformed(final ActionEvent ignored) {
-                try (InputStream is = new FileInputStream(PATH)) {
-                    final List<Byte> list1 = new ArrayList<>();
-                    int c = is.read();
-                    while (c != -1) {
-                        list1.add((byte) c);
-                        c = is.read();
+                try {
+                    final List<String> lines = Files.readAllLines(new File(PATH).toPath());
+                    for (final String line: lines) {
+                        System.out.println(line);
                     }
-                    System.out.println(list1);
                 } catch (final IOException e) {
                     JOptionPane.showMessageDialog(frame, e, "Error", JOptionPane.ERROR_MESSAGE);
                     e.printStackTrace(); // NOPMD: allowed as this is just an exercise
