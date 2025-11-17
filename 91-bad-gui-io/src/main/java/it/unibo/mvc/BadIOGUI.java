@@ -11,12 +11,14 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.List;
 import java.util.Random;
+import java.io.InputStream;
+import java.util.ArrayList;
 
 /**
  * This class is a simple application that writes a random number on a file.
@@ -27,7 +29,6 @@ import java.util.Random;
  * applications.
  */
 public class BadIOGUI {
-
     private static final String TITLE = "A very simple GUI application";
     private static final String PATH = System.getProperty("user.home")
             + File.separator
@@ -35,15 +36,20 @@ public class BadIOGUI {
     private static final int PROPORTION = 5;
     private final Random randomGenerator = new Random();
     private final JFrame frame = new JFrame(TITLE);
-
     /**
      * Creates a new BadIOGUI.
      */
+
     public BadIOGUI() {
         final JPanel canvas = new JPanel();
         canvas.setLayout(new BorderLayout());
+        final JPanel horizontalPanel = new JPanel();
+        horizontalPanel.setLayout(new BoxLayout(horizontalPanel, BoxLayout.Y_AXIS));
+        canvas.add(horizontalPanel, BorderLayout.CENTER);
         final JButton write = new JButton("Write on file");
-        canvas.add(write, BorderLayout.CENTER);
+        final JButton read = new JButton("Read from file");
+        horizontalPanel.add(write, BorderLayout.CENTER);
+        horizontalPanel.add(read, BorderLayout.CENTER);
         frame.setContentPane(canvas);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         /*
@@ -61,6 +67,24 @@ public class BadIOGUI {
                  */
                 try (PrintStream ps = new PrintStream(PATH, StandardCharsets.UTF_8)) {
                     ps.print(randomGenerator.nextInt());
+                } catch (final IOException e) {
+                    JOptionPane.showMessageDialog(frame, e, "Error", JOptionPane.ERROR_MESSAGE);
+                    e.printStackTrace(); // NOPMD: allowed as this is just an exercise
+                }
+            }
+        });
+        read.addActionListener(new ActionListener() {
+            @Override
+            @SuppressWarnings("PMD.SystemPrintln")
+            public void actionPerformed(final ActionEvent ignored) {
+                try (InputStream is = new FileInputStream(PATH)) {
+                    final List<Byte> list1 = new ArrayList<>();
+                    int c = is.read();
+                    while (c != -1) {
+                        list1.add((byte) c);
+                        c = is.read();
+                    }
+                    System.out.println(list1);
                 } catch (final IOException e) {
                     JOptionPane.showMessageDialog(frame, e, "Error", JOptionPane.ERROR_MESSAGE);
                     e.printStackTrace(); // NOPMD: allowed as this is just an exercise
@@ -88,6 +112,7 @@ public class BadIOGUI {
          * on screen. Results may vary, but it is generally the best choice.
          */
         frame.setLocationByPlatform(true);
+        frame.pack();
         /*
          * OK, ready to push the frame onscreen
          */
